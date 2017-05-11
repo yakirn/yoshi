@@ -23,15 +23,15 @@ const globs = require('../lib/globs');
 
 const userConfPath = path.resolve('protractor.conf.js');
 const userConf = exists(userConfPath) ? require(userConfPath).config : null;
-const onPrepare = (userConf && userConf.onPrepare) || ld.noop;
-const onComplete = (userConf && userConf.onComplete) || ld.noop;
+const beforeLaunch = (userConf && userConf.beforeLaunch) || ld.noop;
+const afterLaunch = (userConf && userConf.afterLaunch) || ld.noop;
 let cdnServer;
 
 const merged = ld.mergeWith({
   framework: 'jasmine',
   specs: [globs.e2e()],
   directConnect: true,
-  onPrepare: () => {
+  beforeLaunch: () => {
     if (merged.framework === 'jasmine' && inTeamCity()) {
       const TeamCityReporter = require('jasmine-reporters').TeamCityReporter;
       jasmine.getEnv().addReporter(new TeamCityReporter());
@@ -44,14 +44,14 @@ const merged = ld.mergeWith({
 
     return start({host: 'localhost'}).then(server => {
       cdnServer = server;
-      return onPrepare.call(merged);
+      return beforeLaunch.call(merged);
     });
   },
-  onComplete: () => {
+  afterLaunch: () => {
     if (cdnServer) {
       cdnServer.close();
     }
-    onComplete(merged);
+    afterLaunch(merged);
   },
   mochaOpts: {
     timeout: 30000
