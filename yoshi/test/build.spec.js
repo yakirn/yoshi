@@ -680,6 +680,36 @@ describe('Aggregator: Build', () => {
       expect(res.code).to.equal(0);
       expect(test.list('dist/statics')).not.to.contain('app.bundle.js');
     });
+
+    it('should not generate a minified version and instead copy the normal bundle inside of TeamCity', () => {
+      const res = test
+        .setup({
+          'src/client.js': `const aFunction = require('./dep');const a = aFunction(1);`,
+          'src/dep.js': `module.exports = function(a){return a + 1;};`,
+          'package.json': fx.packageJson(),
+          'pom.xml': fx.pom()
+        })
+        .execute('build', [], outsideTeamCity);
+
+      expect(res.code).to.equal(0);
+      expect(test.content('dist/statics/app.bundle.js')).to.eql(test.content('dist/statics/app.bundle.min.js'));
+      expect(test.content('dist/statics/app.bundle.js.map')).to.eql(test.content('dist/statics/app.bundle.min.js.map'));
+    });
+
+    it('should generate a minified version inside of TeamCity', () => {
+      const res = test
+        .setup({
+          'src/client.js': `const aFunction = require('./dep');const a = aFunction(1);`,
+          'src/dep.js': `module.exports = function(a){return a + 1;};`,
+          'package.json': fx.packageJson(),
+          'pom.xml': fx.pom()
+        })
+        .execute('build', [], insideTeamCity);
+
+      expect(res.code).to.equal(0);
+      expect(test.content('dist/statics/app.bundle.js')).not.to.eql(test.content('dist/statics/app.bundle.min.js'));
+      expect(test.content('dist/statics/app.bundle.js.map')).not.to.eql(test.content('dist/statics/app.bundle.min.js.map'));
+    });
   });
 
   describe('Bundle output with library support', () => {
