@@ -4,6 +4,8 @@
 yoshi
 </h1>
 
+[![Build Status](https://travis-ci.org/wix/yoshi.svg?branch=master)](https://travis-ci.org/wix/yoshi)
+
 > A tool for common tasks in Javascript projects.
 
 ## Features
@@ -38,8 +40,9 @@ In your `package.json`:
 {
   "scripts": {
     "start": "yoshi start",
+    "pretest": "yoshi lint && yoshi build", 
     "test": "yoshi test",
-    "build": "yoshi lint && yoshi build",
+    "build": ":",
     "release": "yoshi release" //only needed if you publish to npm
     ...
   }
@@ -228,6 +231,20 @@ Explanation is in [cli/build](#build) section.
 ##### yoshi.servers.cdn
 
 Explanation is in [cli/start](#start) section.
+
+##### yoshi.externals
+
+Prevent bundling of certain imported packages and instead retrieve these external dependencies at runtime (as a script tags)
+
+```json
+{
+  "yoshi": {
+    "externals": {
+      "react": "React"
+    }
+  }
+}
+```
 
 ##### yoshi.specs
 

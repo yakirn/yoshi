@@ -23,15 +23,26 @@ const globs = require('../lib/globs');
 
 const userConfPath = path.resolve('protractor.conf.js');
 const userConf = exists(userConfPath) ? require(userConfPath).config : null;
+
 const beforeLaunch = (userConf && userConf.beforeLaunch) || ld.noop;
 const afterLaunch = (userConf && userConf.afterLaunch) || ld.noop;
+
 let cdnServer;
 
 const merged = ld.mergeWith({
   framework: 'jasmine',
   specs: [globs.e2e()],
   directConnect: true,
+
   beforeLaunch: () => {
+    const rootDir = './src';
+    require('css-modules-require-hook')({
+      rootDir,
+      generateScopedName: require('./css-scope-pattern'),
+      extensions: ['.scss', '.css'],
+      camelCase: true
+    });
+
     if (merged.framework === 'jasmine' && inTeamCity()) {
       const TeamCityReporter = require('jasmine-reporters').TeamCityReporter;
       jasmine.getEnv().addReporter(new TeamCityReporter());

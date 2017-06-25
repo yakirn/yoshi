@@ -88,7 +88,7 @@ describe('Aggregator: e2e', () => {
       this.timeout(60000);
 
       const res = test
-        .setup(singleModuleWithJasmineAndES6Imports(), [hooks.installDependencies, hooks.installProtractor])
+        .setup(singleModuleWithJasmineAndES6Imports(true), [hooks.installDependencies, hooks.installProtractor])
         .execute('test', ['--protractor'], outsideTeamCity);
 
       expect(res.code).to.equal(0);
@@ -96,6 +96,17 @@ describe('Aggregator: e2e', () => {
       expect(res.stdout).to.contain('1 spec, 0 failures');
       // a dummy import in order to use es6 feature that is not supported by node env ootb
       expect(fx.e2eTestJasmineES6Imports()).to.contain(`import path from 'path'`);
+    });
+
+    it('should not use babel-register', function () {
+      this.timeout(60000);
+
+      const res = test
+        .setup(singleModuleWithJasmineAndES6Imports(false), [hooks.installProtractor])
+        .execute('test', ['--protractor'], outsideTeamCity);
+
+      expect(res.code).to.equal(1);
+      expect(res.stdout).to.contain('Unexpected token import');
     });
   });
 
@@ -111,6 +122,29 @@ describe('Aggregator: e2e', () => {
     expect(res.stdout).to.not.contain('protractor');
   });
 
+  it('should support css class selectors with cssModules on', function () {
+    this.timeout(60000);
+
+    test
+      .setup(singleModuleWithCssModules(), [hooks.installDependencies, hooks.installProtractor])
+      .execute('build');
+
+    const res = test.execute('test', ['--protractor'], outsideTeamCity);
+
+    expect(res.code).to.equal(0);
+  });
+
+  it('should extend project\'s beforeLaunch', function () {
+    this.timeout(60000);
+    const res = test
+    .setup(singleModuleWithBeforLaunch(), [hooks.installProtractor])
+    .execute('test', ['--protractor'], outsideTeamCity);
+
+    expect(res.code).to.equal(0);
+    expect(res.stdout).to.contain('protractor');
+    expect(res.stdout).to.contain('1 spec, 0 failures');
+  });
+
   function cdnConfigurations() {
     return {
       servers: {
@@ -121,13 +155,13 @@ describe('Aggregator: e2e', () => {
     };
   }
 
-  function singleModuleWithJasmineAndES6Imports() {
+  function singleModuleWithJasmineAndES6Imports(runIndividualTranspiler) {
     return Object.assign(singleModuleWithJasmine(), {
       'dist/test/subFolder/some.e2e.js': fx.e2eTestJasmineES6Imports(),
       'package.json': `{
           "name": "a",\n
           "version": "1.0.4",\n
-          "yoshi": ${JSON.stringify(cdnConfigurations())},
+          "yoshi": ${JSON.stringify(Object.assign(cdnConfigurations(), {runIndividualTranspiler}))},
           "dependencies": {
             "babel-plugin-transform-es2015-modules-commonjs": "latest"
           },
@@ -174,5 +208,23 @@ describe('Aggregator: e2e', () => {
         Object.assign(cdnConfigurations())
       )
     };
+  }
+
+  function singleModuleWithCssModules() {
+    return {
+      'protractor.conf.js': fx.protractorConfWithStatics(),
+      'test/some.e2e.js': fx.e2eTestWithCssModules(),
+      'src/client.js': `const style = require('./some.css');
+        document.body.innerHTML = style.className;
+      `,
+      'src/some.css': `.class-name {color: green;}`,
+      'package.json': fx.packageJson(cdnConfigurations(), {express: 'latest'})
+    };
+  }
+
+  function singleModuleWithBeforLaunch() {
+    return Object.assign(singleModuleWithJasmine(), {
+      'protractor.conf.js': fx.protractorConfWithBeforeLaunch()
+    });
   }
 });
