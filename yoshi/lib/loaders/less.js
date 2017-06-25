@@ -19,26 +19,28 @@ module.exports = (separateCss, cssModules, tpaStyle) => {
   };
 
   return {
-    client: {
-      test: /\.less$/,
-      use: clientLoader(separateCss, 'style-loader', [
-        {
-          loader: 'css-loader',
-          options: cssLoaderOptions
-        },
-        {
-          loader: 'postcss-loader',
-          options: {
-            config: path.join(__dirname, '..', '..', 'config', 'postcss.config.js')
+    client: [
+      {
+        test: /\.less$/,
+        use: clientLoader(separateCss, 'style-loader', [
+          {
+            loader: 'css-loader',
+            options: cssLoaderOptions
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              config: path.join(__dirname, '..', '..', 'config', 'postcss.config.js')
+            }
+          },
+          ...tpaStyle ? ['wix-tpa-style-loader'] : [],
+          {
+            loader: 'less-loader',
+            options: lessLoaderOptions
           }
-        },
-        ...tpaStyle ? ['wix-tpa-style-loader'] : [],
-        {
-          loader: 'less-loader',
-          options: lessLoaderOptions
-        }
-      ])
-    },
+        ])
+      }
+    ],
     specs: {
       test: /\.less$/,
       use: [

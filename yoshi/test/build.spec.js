@@ -844,6 +844,23 @@ describe('Aggregator: Build', () => {
       expect(test.content(`dist/${defaultOutput}/app.css`)).to.contain('.a .b {');
     });
 
+    it('should disable css modules for .global.scss files', () => {
+      const res = test
+        .setup({
+          'src/client.js': 'require(\'./styles/my-file.global.scss\');',
+          'src/styles/my-file.global.scss': `.a {.b {color: red;}}`,
+          'package.json': fx.packageJson({
+            separateCss: true
+          }),
+          'pom.xml': fx.pom()
+        })
+        .execute('build');
+
+      expect(res.code).to.equal(0);
+      expect(test.content(`dist/${defaultOutput}/app.css`)).to.contain('.a .b {');
+    });
+
+
     it.skip('should generate a bundle with svg/images', () => {
       const res = test
         .setup({
