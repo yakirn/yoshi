@@ -529,6 +529,13 @@ file-entry-cache@^2.0.0:
     flat-cache "^1.2.1"
     object-assign "^4.0.1"
 
+fill-keys@^1.0.2:
+  version "1.0.2"
+  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/fill-keys/-/fill-keys-1.0.2.tgz#9a8fa36f4e8ad634e3bf6b4f3c8882551452eb20"
+  dependencies:
+    is-object "~1.0.1"
+    merge-descriptors "~1.0.0"
+
 flat-cache@^1.2.1:
   version "1.2.2"
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/flat-cache/-/flat-cache-1.2.2.tgz#fa86714e72c21db88601761ecf2f555d1abc6b96"
@@ -710,6 +717,10 @@ is-my-json-valid@^2.10.0:
     generate-object-property "^1.1.0"
     jsonpointer "^4.0.0"
     xtend "^4.0.0"
+
+is-object@~1.0.1:
+  version "1.0.1"
+  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/is-object/-/is-object-1.0.1.tgz#8952688c5ec2ffd6b03ecc85e769e02903083470"
 
 is-path-cwd@^1.0.0:
   version "1.0.0"
@@ -893,6 +904,10 @@ make-dir@^1.0.0:
   dependencies:
     pify "^2.3.0"
 
+merge-descriptors@~1.0.0:
+  version "1.0.1"
+  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/merge-descriptors/-/merge-descriptors-1.0.1.tgz#b00aaa556dd8b44568150ec9d1b953f3f90cbb61"
+
 minimatch@^3.0.2, minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
@@ -946,6 +961,10 @@ mock-bin@^2.0.0:
     shebang-regex "^2.0.0"
     shelljs "^0.7.0"
     temp-write "^3.3.0"
+
+module-not-found-error@^1.0.0:
+  version "1.0.1"
+  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/module-not-found-error/-/module-not-found-error-1.0.1.tgz#cf8b4ff4f29640674d6cdd02b0e3bc523c2bbdc0"
 
 ms@0.7.2:
   version "0.7.2"
@@ -1056,6 +1075,14 @@ progress@^1.1.8:
   version "1.1.8"
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/progress/-/progress-1.1.8.tgz#e260c78f6161cdd9b0e56cc3e0a85de17c7a57be"
 
+proxyquire@^1.8.0:
+  version "1.8.0"
+  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/proxyquire/-/proxyquire-1.8.0.tgz#02d514a5bed986f04cbb2093af16741535f79edc"
+  dependencies:
+    fill-keys "^1.0.2"
+    module-not-found-error "^1.0.0"
+    resolve "~1.1.7"
+
 pseudomap@^1.0.2:
   version "1.0.2"
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/pseudomap/-/pseudomap-1.0.2.tgz#f052a28da70e618917ef0a8ac34c1ae5a68286b3"
@@ -1105,7 +1132,7 @@ resolve-from@^1.0.0:
   version "1.0.1"
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/resolve-from/-/resolve-from-1.0.1.tgz#26cbfe935d1aeeeabb29bc3fe5aeb01e93d44226"
 
-resolve@^1.1.6:
+resolve@^1.1.6, resolve@~1.1.7:
   version "1.1.7"
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/resolve/-/resolve-1.1.7.tgz#203114d82ad2c5ed9e8e0411b3932875e889e97b"
 
@@ -1158,7 +1185,7 @@ shelljs@^0.5.3:
   version "0.5.3"
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/shelljs/-/shelljs-0.5.3.tgz#c54982b996c76ef0c1e6b59fbdc5825f5b713113"
 
-shelljs@^0.7.0, shelljs@^0.7.5, shelljs@^0.7.6:
+shelljs@^0.7.0, shelljs@^0.7.5, shelljs@^0.7.6, shelljs@^0.7.8:
   version "0.7.8"
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/shelljs/-/shelljs-0.7.8.tgz#decbcf874b0d1e5fb72e14b164a9683048e9acb3"
   dependencies:

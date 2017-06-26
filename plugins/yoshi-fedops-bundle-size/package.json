@@ -19,6 +19,8 @@
     "mocha": "^3.2.0",
     "mocha-env-reporter": "^2.0.4",
     "mock-bin": "^2.0.0",
+    "proxyquire": "^1.8.0",
+    "shelljs": "^0.7.8",
     "sinon": "^2.3.5",
     "sinon-chai": "^2.11.0",
     "strip-ansi": "^3.0.1",
