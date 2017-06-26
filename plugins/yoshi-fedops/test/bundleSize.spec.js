@@ -11,7 +11,7 @@ const {expect} = chai;
 const shellExecSpy = sinon.spy((str, cb) => {
   cb(str);
 });
-const fedopsBundleSize = proxyquire('../index', {
+const fedopsBundleSize = proxyquire('../plugins/bundleSize', {
   'shelljs': {exec: shellExecSpy}
 });
 
