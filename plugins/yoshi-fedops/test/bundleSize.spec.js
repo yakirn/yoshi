@@ -1,7 +1,6 @@
 'use strict';
 const sinonChai = require('sinon-chai');
 const chai = require('chai');
-const intercept = require('intercept-stdout');
 const tp = require('test-phases');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
@@ -17,7 +16,7 @@ const fedopsBundleSize = proxyquire('../plugins/bundleSize', {
 
 const APP_NAME = 'your-unique-app-name'; // eslint-disable-line camelcase
 const fedopsJson = JSON.stringify({
-  app_name: APP_NAME
+  app_name: APP_NAME // eslint-disable-line camelcase
 }, null, 2);
 
 describe('measure bundle size', () => {
