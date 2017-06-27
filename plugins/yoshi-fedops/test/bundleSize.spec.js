@@ -153,7 +153,7 @@ describe('measure bundle size', () => {
     test.setup({
       'dist/app.bundle.min.js': someFileContent,
       'fedops.json': JSON.stringify({
-        app_name: 'proj.with.dots'
+        app_name: 'proj.with.dots' // eslint-disable-line camelcase
       }, null, 2)
     });
     const task = createTask();

@@ -24,15 +24,13 @@ const getBundleNames = config => {
 const replaceDotsWithUnderscore = str => str.replace(/\./g, '_');
 
 const command = ({appName, bundleName, bundleSize, timestamp}) => {
-  // eslint-disable camelcase
   const args = {
     'wix-bi-tube.root': 'events_catalog',
     src: '72',
-    app_name: replaceDotsWithUnderscore(appName),
-    bundle_name: replaceDotsWithUnderscore(bundleName),
-    bundle_size: bundleSize
+    app_name: replaceDotsWithUnderscore(appName), // eslint-disable-line camelcase
+    bundle_name: replaceDotsWithUnderscore(bundleName), // eslint-disable-line camelcase
+    bundle_size: bundleSize // eslint-disable-line camelcase
   };
-  // eslint-enable camelcase
 
   return ''.concat(
     'echo `',
