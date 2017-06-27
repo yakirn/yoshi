@@ -16,18 +16,20 @@ const isSingleEntry = entry => typeof entry === 'string' || Array.isArray(entry)
 
 const getBundleNames = config => {
   const {defaultEntry, entry: customEntry} = config;
-  const entryGetter = customEntry || defaultEntry || (() => null);
+  const entryGetter = customEntry || defaultEntry;
   const entry = entryGetter();
   return isSingleEntry(entry) ? 'app' : Object.keys(entry);
-}
+};
+
+const replaceDotsWithUnderscore = str => str.replace(/\./g, '_');
 
 const command = ({appName, bundleName, bundleSize, timestamp}) => {
   const args = {
     'wix-bi-tube.root': 'events_catalog',
     src: '72',
-    'app_name': appName,
-    'bundle_name': bundleName,
-    'bundle_size': bundleSize
+    app_name: replaceDotsWithUnderscore(appName),
+    bundle_name: replaceDotsWithUnderscore(bundleName),
+    bundle_size: bundleSize
   };
 
   return ''.concat(
@@ -37,7 +39,7 @@ const command = ({appName, bundleName, bundleSize, timestamp}) => {
     timestamp,
     '` | nc -q0 m.wixpress.com 2003'
   );
-}
+};
 
 const shellExec = (config, timestamp) => bundleName => {
   return new Promise(resolve => {
@@ -57,7 +59,7 @@ const shellExec = (config, timestamp) => bundleName => {
       resolve();
     });
   });
-}
+};
 
 module.exports = ({log, inTeamCity, projectConfig}) => {
   function fedopsBundleSize() {

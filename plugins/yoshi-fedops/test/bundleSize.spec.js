@@ -12,7 +12,7 @@ const shellExecSpy = sinon.spy((str, cb) => {
   cb(str);
 });
 const fedopsBundleSize = proxyquire('../plugins/bundleSize', {
-  'shelljs': {exec: shellExecSpy}
+  shelljs: {exec: shellExecSpy}
 });
 
 const APP_NAME = 'your-unique-app-name'; // eslint-disable-line camelcase
@@ -25,6 +25,7 @@ describe('measure bundle size', () => {
   const someFileContent = `console.log('hello world');`;
   const someOtherFileContent = `console.log('foo bar');`;
   const bundleSize = content => content.length + 1;
+  const defaultEntry = 'src/index.js';
   let clock;
   let test;
 
@@ -36,15 +37,15 @@ describe('measure bundle size', () => {
     const defaults = {
       log: a => a,
       inTeamCity: () => true,
-      projectConfig: Object.assign({defaultEntry: () => 'src/index.js'}, projectConfig),
+      projectConfig: Object.assign({defaultEntry: () => defaultEntry}, projectConfig),
     };
 
     return fedopsBundleSize(Object.assign({}, defaults, rest));
   };
 
-  const output = (bundleName, fileContent) => {
-    return `echo \`wix-bi-tube.root=events_catalog.src=72.app_name=${APP_NAME}.bundle_name=${bundleName}.bundle_size=${bundleSize(fileContent)} ${timestamp}\` | nc -q0 m.wixpress.com 2003`;
-  }
+  const output = (bundleName, fileContent, appName = APP_NAME) => {
+    return `echo \`wix-bi-tube.root=events_catalog.src=72.app_name=${appName}.bundle_name=${bundleName}.bundle_size=${bundleSize(fileContent)} ${timestamp}\` | nc -q0 m.wixpress.com 2003`;
+  };
 
   beforeEach(() => {
     test = tp.create();
@@ -146,6 +147,32 @@ describe('measure bundle size', () => {
     return task().then(() => {
       expect(shellExecSpy).to.have.been.calledOnce;
       expect(shellExecSpy).to.have.been.calledWith(output('b', someFileContent));
+    });
+  });
+
+  it('should replace dots with underscore in project name', () => {
+    test.setup({
+      'dist/app.bundle.min.js': someFileContent,
+      'fedops.json': JSON.stringify({
+        app_name: 'proj.with.dots'
+      }, null, 2)
+    });
+    const task = createTask();
+    return task().then(() => {
+      expect(shellExecSpy).to.have.been.calledOnce;
+      expect(shellExecSpy).to.have.been.calledWith(output('app', someFileContent, 'proj_with_dots'));
+    });
+  });
+
+  it('should replace dots with underscore in bundle file name', () => {
+    test.setup({
+      'dist/bundle.with.dots.bundle.min.js': someFileContent,
+      'fedops.json': fedopsJson
+    });
+    const task = createTask({projectConfig: {entry: () => ({'bundle.with.dots': 'src/a.js'})}});
+    return task().then(() => {
+      expect(shellExecSpy).to.have.been.calledOnce;
+      expect(shellExecSpy).to.have.been.calledWith(output('bundle_with_dots', someFileContent));
     });
   });
 });
