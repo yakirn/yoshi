@@ -18,7 +18,6 @@
     "intercept-stdout": "^0.1.2",
     "mocha": "^3.2.0",
     "mocha-env-reporter": "^2.0.4",
-    "mock-bin": "^2.0.0",
     "proxyquire": "^1.8.0",
     "shelljs": "^0.7.8",
     "sinon": "^2.3.5",
