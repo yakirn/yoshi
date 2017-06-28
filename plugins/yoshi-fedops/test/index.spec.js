@@ -10,8 +10,8 @@ const {expect} = chai;
 const shellExecSpy = sinon.spy((str, cb) => {
   cb(str);
 });
-const fedopsBundleSize = proxyquire('../plugins/bundleSize', {
-  shelljs: {exec: shellExecSpy}
+const fedopsBundleSize = proxyquire('../index', {
+  child_process: {exec: shellExecSpy} // eslint-disable-line camelcase
 });
 
 const APP_NAME = 'your-unique-app-name'; // eslint-disable-line camelcase
@@ -58,7 +58,7 @@ describe('measure bundle size', () => {
     clock.restore();
   });
 
-  it('should\'nt do anything if not in team city', () => {
+  it('shouldn\'t do anything if not in team city', () => {
     test.setup({
       'dist/app.bundle.min.js': someFileContent,
       'fedops.json': fedopsJson
@@ -69,7 +69,7 @@ describe('measure bundle size', () => {
     });
   });
 
-  it('should\'nt do anything if no fedops config found', () => {
+  it('shouldn\'t do anything if no fedops config found', () => {
     test.setup({
       'dist/app.bundle.min.js': someFileContent
     });
