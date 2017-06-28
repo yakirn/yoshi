@@ -13,9 +13,19 @@ const tryRequire = name => {
   }
 };
 
+const globAsync = (patter, options) => new Promise((resolve, reject) => {
+  glob(patter, options, (err, matches) => {
+    if (err) {
+      reject(err);
+      return;
+    }
+
+    resolve(matches);
+  });
+});
+
 const getBundleNames = () => {
-  const files = glob.sync(path.resolve(process.cwd(), 'dist/statics/*.min.@(js|css)'));
-  return files;
+  return globAsync(path.resolve(process.cwd(), 'dist/statics/*.min.@(js|css)'));
 };
 
 const replaceDotsWithUnderscore = str => str.replace(/\./g, '_');
@@ -58,7 +68,7 @@ const shellExec = (config, timestamp) => bundleName => {
   });
 };
 
-module.exports = ({log, inTeamCity, projectConfig}) => {
+module.exports = ({log, inTeamCity}) => {
   function fedopsBundleSize() {
     if (!inTeamCity()) {
       return Promise.resolve();
@@ -70,18 +80,15 @@ module.exports = ({log, inTeamCity, projectConfig}) => {
       return Promise.resolve();
     }
 
-    let promises = [];
-
-    try {
-      const bundleNames = getBundleNames(projectConfig);
-      promises = bundleNames.map(shellExec(config, Date.now()));
-    } catch (e) {
-      console.warn('Bundle size report error:', e);
-      return Promise.resolve();
-    }
-
-    return log(Promise.all(promises));
+    return getBundleNames()
+        .then(bundleNames => {
+          return Promise.all(bundleNames.map(shellExec(config, Date.now())));
+        })
+        .catch(e => {
+          console.warn('Bundle size report error:', e);
+          return Promise.resolve();
+        });
   }
 
-  return fedopsBundleSize;
+  return log(fedopsBundleSize);
 };
