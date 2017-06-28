@@ -1,5 +1,5 @@
 {
-  "name": "yoshi-fedops-bundle-size",
+  "name": "yoshi-fedops-build-report",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -15,7 +15,6 @@
     "chai": "^3.5.0",
     "eslint": "^3.16.1",
     "eslint-config-wix": "^1.1.4",
-    "intercept-stdout": "^0.1.2",
     "mocha": "^3.2.0",
     "mocha-env-reporter": "^2.0.4",
     "proxyquire": "^1.8.0",
@@ -27,5 +26,8 @@
   },
   "eslintConfig": {
     "extends": "wix"
+  },
+  "dependencies": {
+    "glob": "^7.1.2"
   }
 }

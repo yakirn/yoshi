@@ -23,20 +23,19 @@ describe('measure bundle size', () => {
   const timestamp = (new Date('2017-06-26')).getTime();
   const someFileContent = `console.log('hello world');`;
   const someOtherFileContent = `console.log('foo bar');`;
+  const cssFileContent = `.app {margin: 4px;}`;
   const bundleSize = content => content.length + 1;
-  const defaultEntry = 'src/index.js';
   let clock;
   let test;
 
   const createTask = (options = {}) => {
-    const {projectConfig} = options;
     const rest = Object.assign({}, options);
     delete rest.projectConfig;
 
     const defaults = {
       log: a => a,
       inTeamCity: () => true,
-      projectConfig: Object.assign({defaultEntry: () => defaultEntry}, projectConfig),
+      projectConfig: {},
     };
 
     return fedopsBundleSize(Object.assign({}, defaults, rest));
@@ -60,7 +59,7 @@ describe('measure bundle size', () => {
 
   it('shouldn\'t do anything if not in team city', () => {
     test.setup({
-      'dist/app.bundle.min.js': someFileContent,
+      'dist/statics/app.bundle.min.js': someFileContent,
       'fedops.json': fedopsJson
     });
     const task = createTask({inTeamCity: () => false});
@@ -71,7 +70,7 @@ describe('measure bundle size', () => {
 
   it('shouldn\'t do anything if no fedops config found', () => {
     test.setup({
-      'dist/app.bundle.min.js': someFileContent
+      'dist/statics/app.bundle.min.js': someFileContent
     });
     const task = createTask({inTeamCity: () => false});
     return task().then(() => {
@@ -79,79 +78,65 @@ describe('measure bundle size', () => {
     });
   });
 
-  it('should report the size off app.bundle.min given no entry point', () => {
+  it('should report the size off a single min.js file', () => {
     test.setup({
-      'dist/app.bundle.min.js': someFileContent,
+      'dist/statics/app.bundle.min.js': someFileContent,
       'fedops.json': fedopsJson
     });
     const task = createTask();
     return task().then(() => {
       expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app', someFileContent));
+      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
     });
   });
 
-  it('should report the size off app.bundle.min given a string entry point', () => {
+  it('should report the size off a single min.css file', () => {
     test.setup({
-      'dist/app.bundle.min.js': someFileContent,
+      'dist/statics/app.bundle.min.css': cssFileContent,
       'fedops.json': fedopsJson
     });
-    const task = createTask({projectConfig: {entry: () => 'src/index2.js'}});
+    const task = createTask();
     return task().then(() => {
       expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app', someFileContent));
+      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_css', cssFileContent));
     });
   });
 
-  it('should report the size off app.bundle.min given a string entry point', () => {
+  it('should report the size of all min js and css files', () => {
     test.setup({
-      'dist/app.bundle.min.js': someFileContent,
+      'dist/statics/a.bundle.min.css': cssFileContent,
+      'dist/statics/a.bundle.min.js': someFileContent,
+      'dist/statics/b.bundle.min.js': someOtherFileContent,
       'fedops.json': fedopsJson
     });
-    const task = createTask({projectConfig: {entry: () => ['src/index2.js', 'src/index3.js']}});
+    const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app', someFileContent));
+      expect(shellExecSpy).to.have.been.calledThrice;
+      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
+      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
+      expect(shellExecSpy.getCall(2).args[0]).to.equal(output('b_bundle_min_js', someOtherFileContent));
     });
   });
 
-  it('should report the size of all keys in entry object', () => {
-    const entry = {
-      a: 'src/a.js',
-      b: 'src/b.js'
-    };
+  it('should not report a non minified bundle', () => {
     test.setup({
-      'dist/a.bundle.min.js': someFileContent,
-      'dist/b.bundle.min.js': someOtherFileContent,
+      'dist/statics/b.bundle.min.js': someFileContent,
+      'dist/statics/b.bundle.js': someFileContent,
+      'dist/statics/b.bundle.min.css': cssFileContent,
+      'dist/statics/b.bundle.css': cssFileContent,
       'fedops.json': fedopsJson
     });
-    const task = createTask({projectConfig: {entry: () => entry}});
+    const task = createTask();
     return task().then(() => {
       expect(shellExecSpy).to.have.been.calledTwice;
-      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('a', someFileContent));
-      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('b', someOtherFileContent));
-    });
-  });
-
-  it('should not report a non existing bundle', () => {
-    const entry = {
-      a: 'src/a.js',
-      b: 'src/b.js'
-    };
-    test.setup({
-      'dist/b.bundle.min.js': someFileContent,
-      'fedops.json': fedopsJson
-    });
-    const task = createTask({projectConfig: {entry: () => entry}});
-    return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('b', someFileContent));
+      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('b_bundle_min_css', cssFileContent));
+      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('b_bundle_min_js', someFileContent));
     });
   });
 
   it('should replace dots with underscore in project name', () => {
     test.setup({
-      'dist/app.bundle.min.js': someFileContent,
+      'dist/statics/app.bundle.min.js': someFileContent,
       'fedops.json': JSON.stringify({
         app_name: 'proj.with.dots' // eslint-disable-line camelcase
       }, null, 2)
@@ -159,19 +144,19 @@ describe('measure bundle size', () => {
     const task = createTask();
     return task().then(() => {
       expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app', someFileContent, 'proj_with_dots'));
+      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent, 'proj_with_dots'));
     });
   });
 
   it('should replace dots with underscore in bundle file name', () => {
     test.setup({
-      'dist/bundle.with.dots.bundle.min.js': someFileContent,
+      'dist/statics/bundle.with.dots.bundle.min.js': someFileContent,
       'fedops.json': fedopsJson
     });
-    const task = createTask({projectConfig: {entry: () => ({'bundle.with.dots': 'src/a.js'})}});
+    const task = createTask();
     return task().then(() => {
       expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('bundle_with_dots', someFileContent));
+      expect(shellExecSpy).to.have.been.calledWith(output('bundle_with_dots_bundle_min_js', someFileContent));
     });
   });
 });
