@@ -106,7 +106,7 @@ describe('Webpack basic configs', () => {
         'src/image.jpg': '(^_^)'.repeat(2500),
         'src/client.js': `const img = require('./image.jpg');`
       })
-        .execute('build');
+      .execute('build');
 
       const content = test.content('dist/statics/app.bundle.js');
       const value = `typeof window !== 'undefined' && window.__STATICS_BASE_URL__ || __webpack_require__.p;`;
