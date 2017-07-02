@@ -129,7 +129,7 @@ describe('Webpack basic configs', () => {
     });
   });
 
-  describe('DefinePlugin configuration', () => {
+  describe.only('DefinePlugin configuration', () => {
     it('Should replace window.__CI_APP_VERSION__ with the current CI Artifact version', () => {
       const res = test.setup({
         'src/client.js': `const foo = window.__CI_APP_VERSION__;`
@@ -137,7 +137,7 @@ describe('Webpack basic configs', () => {
       .execute('build', [], teamCityArtifactVersion);
 
       expect(res.code).to.equal(0);
-      expect(test.content('dist/statics/app.bundle.js')).to.contain('1.0.0');
+      expect(test.content('dist/statics/app.bundle.js')).to.contain('"1.0.0"');
     });
 
     it('Should default to 0.0.0 when not in CI', () => {
@@ -147,7 +147,7 @@ describe('Webpack basic configs', () => {
       .execute('build');
 
       expect(res.code).to.equal(0);
-      expect(test.content('dist/statics/app.bundle.js')).to.contain('0.0.0');
+      expect(test.content('dist/statics/app.bundle.js')).to.contain('"0.0.0"');
     });
   });
 });
