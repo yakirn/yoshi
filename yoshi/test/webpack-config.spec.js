@@ -130,9 +130,9 @@ describe('Webpack basic configs', () => {
   });
 
   describe('DefinePlugin configuration', () => {
-    it('Should replace window.__CI_APP_VERSION__ with the current CI Artivact version', () => {
+    it('Should replace window.__CI_APP_VERSION__ with the current CI Artifact version', () => {
       const res = test.setup({
-        'src/client.js': `console.log(window.__CI_APP_VERSION__);`
+        'src/client.js': `const foo = window.__CI_APP_VERSION__;`
       })
       .execute('build', [], teamCityArtifactVersion);
 
@@ -142,7 +142,7 @@ describe('Webpack basic configs', () => {
 
     it('Should default to 0.0.0 when not in CI', () => {
       const res = test.setup({
-        'src/client.js': `console.log(window.__CI_APP_VERSION__);`
+        'src/client.js': `const foo = window.__CI_APP_VERSION__;`
       })
       .execute('build');
 
