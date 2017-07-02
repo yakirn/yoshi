@@ -129,7 +129,7 @@ describe('Webpack basic configs', () => {
     });
   });
 
-  describe.only('DefinePlugin configuration', () => {
+  describe('DefinePlugin configuration', () => {
     it('Should replace window.__CI_APP_VERSION__ with the current CI Artifact version', () => {
       const res = test.setup({
         'src/client.js': `const foo = window.__CI_APP_VERSION__;`
