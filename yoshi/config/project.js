@@ -41,6 +41,7 @@ module.exports = {
   defaultEntry: () => './client',
   separateCss: () => getConfig('separateCss', true),
   cssModules: () => getConfig('cssModules', true),
+  define: () => getConfig('define', {}),
   tpaStyle: () => getConfig('tpaStyle', false),
   externals: () => getConfig('externals', []),
   babel: () => _.get(packagejson, 'babel'),

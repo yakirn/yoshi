@@ -11,6 +11,7 @@ const DynamicPublicPath = require('../lib/plugins/dynamic-public-path');
 const config = ({debug, separateCss = projectConfig.separateCss()} = {}) => {
   const cssModules = projectConfig.cssModules();
   const tpaStyle = projectConfig.tpaStyle();
+  const definitions = projectConfig.define();
 
   return mergeByConcat(webpackConfigCommon, {
     entry: getEntry(),
@@ -29,10 +30,10 @@ const config = ({debug, separateCss = projectConfig.separateCss()} = {}) => {
 
       new DynamicPublicPath(),
 
-      new webpack.DefinePlugin({
+      new webpack.DefinePlugin(Object.assign({}, definitions, {
         'process.env.NODE_ENV': debug ? '"development"' : '"production"',
         'window.__CI_APP_VERSION__': process.env.ARTIFACT_VERSION ? `"${process.env.ARTIFACT_VERSION}"` : '"0.0.0"'
-      }),
+      })),
 
       ...!separateCss ? [] : [
         new ExtractTextPlugin(debug ? '[name].css' : '[name].min.css')

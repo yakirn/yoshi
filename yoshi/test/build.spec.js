@@ -4,7 +4,8 @@ const fx = require('./helpers/fixtures');
 const hooks = require('./helpers/hooks');
 const {
   outsideTeamCity,
-  insideTeamCity
+  insideTeamCity,
+  teamCityArtifactVersion
 } = require('./helpers/env-variables');
 const {
   readFileSync
@@ -1601,5 +1602,41 @@ describe('Aggregator: Build', () => {
     it.skip('should do nothing if there is no petri-specs installed', () => {
       // TODO: figure out how to simulate module doesn't exist in registry
     });
+  });
+
+  describe('yoshi.define config', () => {
+    it('should add definition to webpack DefinePlugin', () => {
+      const res = test
+        .setup({
+          'src/client.js': 'const foo = someObj.someProp',
+          'package.json': fx.packageJson({
+            define: {
+              'someObj.someProp': '"someValue"'
+            }
+          })
+        })
+        .execute('build');
+
+      expect(res.code).to.equal(0);
+      expect(test.content(`dist/statics/app.bundle.js`)).to.contain('const foo = "someValue"');
+    });
+
+    it('should not allow to override predefined rules', () => {
+      const res = test
+        .setup({
+          'src/client.js': 'const foo = window.__CI_APP_VERSION__; const bar = process.env.NODE_ENV;',
+          'package.json': fx.packageJson({
+            define: {
+              'process.env.NODE_ENV': '"someNodeEnv"',
+              'window.__CI_APP_VERSION__': '"someVersion"'
+            }
+          })
+        })
+        .execute('build', [], teamCityArtifactVersion);
+
+      expect(res.code).to.equal(0);
+      expect(test.content(`dist/statics/app.bundle.js`)).to.contain('const foo = "1.0.0";const bar = "development";');
+    });
+
   });
 });
