@@ -53,23 +53,31 @@ const command = ({appName, bundleName, bundleSize, timestamp}) => {
 };
 
 const shellExec = (config, timestamp) => bundleName => {
-  return new Promise(resolve => {
-    fs.stat(path.resolve(process.cwd(), bundleName), (err, stats) => {
-      if (!err) {
-        const bundleSize = stats.size;
-        const params = {
-          appName: config.app_name,
-          bundleName,
-          bundleSize,
-          timestamp
-        };
-        exec(command(params), resolve);
-        return;
-      }
-      console.warn(`Error code ${err.code}. Failed to find size of file ${bundleName}.bundle.min.js.`);
-      resolve();
+  const promises = [].concat(config).map(fedopsJson => {
+    return new Promise(resolve => {
+      fs.stat(path.resolve(process.cwd(), bundleName), (err, stats) => {
+        if (!err) {
+          const bundleSize = stats.size;
+          const params = {
+            appName: fedopsJson.app_name || fedopsJson.appName,
+            bundleName,
+            bundleSize,
+            timestamp
+          };
+          if (params.appName) {
+            exec(command(params), resolve);
+          } else {
+            console.warn('fedops.json is missing "app_name" field');
+            resolve();
+          }
+          return;
+        }
+        console.warn(`Error code ${err.code}. Failed to find size of file ${bundleName}.bundle.min.js.`);
+        resolve();
+      });
     });
   });
+  return Promise.all(promises);
 };
 
 module.exports = ({log, inTeamCity}) => {

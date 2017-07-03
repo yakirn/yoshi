@@ -67,7 +67,7 @@ describe('measure bundle size', () => {
     });
     const task = createTask({inTeamCity: () => false});
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.notCalled;
+      expect(shellExecSpy).not.to.have.been.called;
     });
   });
 
@@ -77,7 +77,7 @@ describe('measure bundle size', () => {
     });
     const task = createTask({inTeamCity: () => false});
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.notCalled;
+      expect(shellExecSpy).not.to.have.been.called;
     });
   });
 
@@ -160,6 +160,72 @@ describe('measure bundle size', () => {
     return task().then(() => {
       expect(shellExecSpy).to.have.been.calledOnce;
       expect(shellExecSpy).to.have.been.calledWith(output('bundle_with_dots_bundle_min_js', someFileContent));
+    });
+  });
+
+  it('should support json arrays', () => {
+    test.setup({
+      'dist/statics/a.bundle.min.css': cssFileContent,
+      'dist/statics/a.bundle.min.js': someFileContent,
+      'fedops.json': `[${fedopsJson}]`
+    });
+    const task = createTask();
+    return task().then(() => {
+      expect(shellExecSpy).to.have.been.calledTwice;
+      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
+      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
+    });
+  });
+
+  it('should support report each file once for each app in the array', () => {
+    const ANOTHER_APP_NAME = 'another-unique-app-name'; // eslint-disable-line camelcase
+    test.setup({
+      'dist/statics/a.bundle.min.css': cssFileContent,
+      'dist/statics/a.bundle.min.js': someFileContent,
+      'fedops.json': `[${fedopsJson}, {"app_name": "${ANOTHER_APP_NAME}"}]`
+    });
+    const task = createTask();
+    return task().then(() => {
+      expect(shellExecSpy).to.have.callCount(4);
+      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
+      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_css', cssFileContent, ANOTHER_APP_NAME));
+      expect(shellExecSpy.getCall(2).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
+      expect(shellExecSpy.getCall(3).args[0]).to.equal(output('a_bundle_min_js', someFileContent, ANOTHER_APP_NAME));
+    });
+  });
+
+  it('should report the appName if no app_name in fedops.json', () => {
+    test.setup({
+      'dist/statics/app.bundle.min.js': someFileContent,
+      'fedops.json': `{"appName": "${APP_NAME}"}`
+    });
+    const task = createTask();
+    return task().then(() => {
+      expect(shellExecSpy).to.have.been.calledOnce;
+      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
+    });
+  });
+
+  it('should not do anything if no app_name or appName in fedops.json', () => {
+    test.setup({
+      'dist/statics/app.bundle.min.js': someFileContent,
+      'fedops.json': `{"not_app_name": "${APP_NAME}"}`
+    });
+    const task = createTask();
+    return task().then(() => {
+      expect(shellExecSpy).not.to.have.been.called;
+    });
+  });
+
+  it('should still send a report for a valid app', () => {
+    test.setup({
+      'dist/statics/app.bundle.min.js': someFileContent,
+      'fedops.json': `[${fedopsJson}, {"not_app_name": "foobar"}]`
+    });
+    const task = createTask();
+    return task().then(() => {
+      expect(shellExecSpy).to.have.been.calledOnce;
+      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
     });
   });
 });
