@@ -460,18 +460,6 @@ describe('Aggregator: Build', () => {
       });
     });
 
-    it(`should not fail to require electron`, () => {
-      const res = test
-        .setup({
-          'src/client.js': `require('electron');`,
-          'package.json': fx.packageJson(),
-          'pom.xml': fx.pom()
-        })
-        .execute('build');
-
-      expect(res.code).to.equal(0);
-    });
-
     it('should generate a bundle', () => {
       const res = test
         .setup({
