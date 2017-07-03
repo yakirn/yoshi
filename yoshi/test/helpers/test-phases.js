@@ -5,6 +5,7 @@ const path = require('path');
 const sh = require('shelljs');
 const spawn = require('cross-spawn');
 const cwd = path.join(__dirname, '..', '..');
+const {outsideTeamCity} = require('./env-variables');
 
 class Test {
   constructor(...args) {
@@ -51,7 +52,7 @@ class Test {
 
   execute(command, cliArgs = [], environment = {}, execOptions = {}) {
     const args = [command].concat(cliArgs).join(' ');
-    const env = Object.assign({}, this.env, environment);
+    const env = Object.assign({}, outsideTeamCity, this.env, environment);
     const options = Object.assign({}, {cwd: this.tmp, env, silent: true}, execOptions);
 
     if (this.hasTmp()) {
