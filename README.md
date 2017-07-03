@@ -49,7 +49,7 @@ In your `package.json`:
 }
 ```
 
-Or within the command-line:
+Or within the command line:
 
 ```console
 yoshi [command] [options]
