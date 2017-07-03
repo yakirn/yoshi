@@ -126,7 +126,7 @@ describe('Aggregator: e2e', () => {
 
     test
       .setup(singleModuleWithCssModules(), [hooks.installDependencies, hooks.installProtractor])
-      .execute('build');
+      .execute('build', [], outsideTeamCity);
 
     const res = test.execute('test', ['--protractor'], outsideTeamCity);
 
