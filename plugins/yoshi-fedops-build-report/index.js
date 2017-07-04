@@ -1,9 +1,19 @@
 'use strict';
 
 const path = require('path');
-const {exec} = require('child_process');
+const graphite = require('graphite-tcp');
 const fs = require('fs');
 const glob = require('glob');
+
+const fsStatP = filePath => new Promise((resolve, reject) => {
+  fs.stat(filePath, (err, stats) => {
+    if (err) {
+      reject(err);
+    } else {
+      resolve(stats);
+    }
+  })
+});
 
 const tryRequire = name => {
   try {
@@ -30,53 +40,61 @@ const getBundleNames = () => {
 
 const replaceDotsWithUnderscore = str => str.replace(/\./g, '_');
 
-const command = ({appName, bundleName, bundleSize, timestamp}) => {
+const command = ({appName, bundleName}) => {
   const metricNames = {
-    'wix-bi-tube.root': 'events_catalog',
-    src: '72',
     app_name: replaceDotsWithUnderscore(appName), // eslint-disable-line camelcase
     bundle_name: replaceDotsWithUnderscore(path.relative(path.join(process.cwd(), 'dist/statics'), bundleName)), // eslint-disable-line camelcase
   };
 
-  const metricNamesSeperator = '.';
+  const metricNamesSeparator = '.';
   const bundleSizeMetricName = 'bundle_size';
 
   return ''.concat(
-    'echo `',
-    Object.keys(metricNames).map(key => `${key}=${metricNames[key]}`).join(metricNamesSeperator),
-    metricNamesSeperator,
-    `${bundleSizeMetricName} ${bundleSize}`,
-    ' ',
-    timestamp,
-    '` | nc -q0 m.wixpress.com 2003'
+    Object.keys(metricNames).map(key => `${key}=${metricNames[key]}`).join(metricNamesSeparator),
+    metricNamesSeparator,
+    `${bundleSizeMetricName}`
   );
 };
 
-const shellExec = (config, timestamp) => bundleName => {
-  const promises = [].concat(config).map(fedopsJson => {
-    return new Promise(resolve => {
-      fs.stat(path.resolve(process.cwd(), bundleName), (err, stats) => {
-        if (!err) {
-          const bundleSize = stats.size;
-          const params = {
-            appName: fedopsJson.app_name || fedopsJson.appName,
-            bundleName,
-            bundleSize,
-            timestamp
-          };
-          if (params.appName) {
-            exec(command(params), resolve);
-          } else {
-            console.warn('fedops.json is missing "app_name" field');
+const reportBundleSize = params => {
+  return new Promise(resolve => {
+    return fsStatP(path.resolve(process.cwd(), params.bundleName))
+      .then(stats => {
+        const metric = graphite.createClient({
+          host: 'm.wixpress.com',
+          port: 2003,
+          prefix: 'wix-bi-tube.root=events_catalog.src=72',
+          callback: () => {
             resolve();
+            metric.close();
           }
-          return;
-        }
+        });
+        metric.put(command(params), stats.size || 0);
+      })
+      .catch(err => {
         console.warn(`Error code ${err.code}. Failed to find size of file ${bundleName}.bundle.min.js.`);
         resolve();
       });
-    });
   });
+};
+
+const reportBundleForApp = bundleName => fedopsJson => {
+  const appName = fedopsJson.app_name || fedopsJson.appName;
+  const params = {
+    appName,
+    bundleName
+  };
+
+  if (!appName) {
+    console.warn('fedops.json is missing "app_name" field');
+    return Promise.resolve();
+  }
+
+  return reportBundleSize(params);
+};
+
+const sendStream = config => bundleName => {
+  const promises = [].concat(config).map(reportBundleForApp(bundleName));
   return Promise.all(promises);
 };
 
@@ -93,13 +111,13 @@ module.exports = ({log, inTeamCity}) => {
     }
 
     return getBundleNames()
-        .then(bundleNames => {
-          return Promise.all(bundleNames.map(shellExec(config, Math.floor(Date.now() / 1000))));
-        })
-        .catch(e => {
-          console.warn('Bundle size report error:', e);
-          return Promise.resolve();
-        });
+      .then(bundleNames => {
+        return Promise.all(bundleNames.map(sendStream(config)));
+      })
+      .catch(e => {
+        console.warn('Bundle size report error:', e);
+        return Promise.resolve();
+      });
   }
 
   return log(fedopsBundleSize);

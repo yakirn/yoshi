@@ -7,11 +7,21 @@ const sinon = require('sinon');
 chai.use(sinonChai);
 const {expect} = chai;
 
-const shellExecSpy = sinon.spy((str, cb) => {
-  cb(str);
-});
+
+const graphitePutSpy = sinon.spy();
+const graphiteCloseSpy = sinon.spy();
+const createClient = ({prefix, port, host, callback}) => {
+  return {
+    put: (m, v) => {
+      graphitePutSpy(`${prefix}.${m} ${v} host=${host} port=${port}`);
+      callback();
+    },
+    close: graphiteCloseSpy
+  }
+}
+
 const fedopsBundleSize = proxyquire('../index', {
-  child_process: {exec: shellExecSpy} // eslint-disable-line camelcase
+  'graphite-tcp': {createClient} // eslint-disable-line camelcase
 });
 
 const APP_NAME = 'your-unique-app-name'; // eslint-disable-line camelcase
@@ -42,10 +52,7 @@ describe('measure bundle size', () => {
   };
 
   const output = (bundleName, fileContent, appName = APP_NAME) => {
-    return ''.concat(
-            `echo \`wix-bi-tube.root=events_catalog.src=72.app_name=${appName}.bundle_name=${bundleName}.bundle_size `,
-            `${bundleSize(fileContent)} ${Math.floor(timestamp / 1000)}\` | nc -q0 m.wixpress.com 2003`
-          );
+    return `wix-bi-tube.root=events_catalog.src=72.app_name=${appName}.bundle_name=${bundleName}.bundle_size ${bundleSize(fileContent)} host=m.wixpress.com port=2003`;
   };
 
   beforeEach(() => {
@@ -56,7 +63,8 @@ describe('measure bundle size', () => {
 
   afterEach(() => {
     test.teardown();
-    shellExecSpy.reset();
+    graphitePutSpy.reset();
+    graphiteCloseSpy.reset();
     clock.restore();
   });
 
@@ -67,7 +75,8 @@ describe('measure bundle size', () => {
     });
     const task = createTask({inTeamCity: () => false});
     return task().then(() => {
-      expect(shellExecSpy).not.to.have.been.called;
+      expect(graphitePutSpy).not.to.have.been.called;
+      expect(graphiteCloseSpy).not.to.have.been.called;
     });
   });
 
@@ -77,7 +86,8 @@ describe('measure bundle size', () => {
     });
     const task = createTask({inTeamCity: () => false});
     return task().then(() => {
-      expect(shellExecSpy).not.to.have.been.called;
+      expect(graphitePutSpy).not.to.have.been.called;
+      expect(graphiteCloseSpy).not.to.have.been.called;
     });
   });
 
@@ -88,8 +98,9 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
+      expect(graphitePutSpy).to.have.been.calledOnce;
+      expect(graphiteCloseSpy).to.have.been.calledOnce;
+      expect(graphitePutSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
     });
   });
 
@@ -100,8 +111,9 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_css', cssFileContent));
+      expect(graphitePutSpy).to.have.been.calledOnce;
+      expect(graphiteCloseSpy).to.have.been.calledOnce;
+      expect(graphitePutSpy).to.have.been.calledWith(output('app_bundle_min_css', cssFileContent));
     });
   });
 
@@ -114,10 +126,11 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledThrice;
-      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
-      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
-      expect(shellExecSpy.getCall(2).args[0]).to.equal(output('b_bundle_min_js', someOtherFileContent));
+      expect(graphitePutSpy).to.have.been.calledThrice;
+      expect(graphiteCloseSpy).to.have.been.calledThrice;
+      expect(graphitePutSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
+      expect(graphitePutSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
+      expect(graphitePutSpy.getCall(2).args[0]).to.equal(output('b_bundle_min_js', someOtherFileContent));
     });
   });
 
@@ -131,9 +144,10 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledTwice;
-      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('b_bundle_min_css', cssFileContent));
-      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('b_bundle_min_js', someFileContent));
+      expect(graphitePutSpy).to.have.been.calledTwice;
+      expect(graphiteCloseSpy).to.have.been.calledTwice;
+      expect(graphitePutSpy.getCall(0).args[0]).to.equal(output('b_bundle_min_css', cssFileContent));
+      expect(graphitePutSpy.getCall(1).args[0]).to.equal(output('b_bundle_min_js', someFileContent));
     });
   });
 
@@ -146,8 +160,9 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent, 'proj_with_dots'));
+      expect(graphitePutSpy).to.have.been.calledOnce;
+      expect(graphiteCloseSpy).to.have.been.calledOnce;
+      expect(graphitePutSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent, 'proj_with_dots'));
     });
   });
 
@@ -158,8 +173,9 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('bundle_with_dots_bundle_min_js', someFileContent));
+      expect(graphitePutSpy).to.have.been.calledOnce;
+      expect(graphiteCloseSpy).to.have.been.calledOnce;
+      expect(graphitePutSpy).to.have.been.calledWith(output('bundle_with_dots_bundle_min_js', someFileContent));
     });
   });
 
@@ -171,9 +187,10 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledTwice;
-      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
-      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
+      expect(graphitePutSpy).to.have.been.calledTwice;
+      expect(graphiteCloseSpy).to.have.been.calledTwice;
+      expect(graphitePutSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
+      expect(graphitePutSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
     });
   });
 
@@ -186,11 +203,12 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.callCount(4);
-      expect(shellExecSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
-      expect(shellExecSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_css', cssFileContent, ANOTHER_APP_NAME));
-      expect(shellExecSpy.getCall(2).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
-      expect(shellExecSpy.getCall(3).args[0]).to.equal(output('a_bundle_min_js', someFileContent, ANOTHER_APP_NAME));
+      expect(graphitePutSpy).to.have.callCount(4);
+      expect(graphiteCloseSpy).to.have.callCount(4);
+      expect(graphitePutSpy.getCall(0).args[0]).to.equal(output('a_bundle_min_css', cssFileContent));
+      expect(graphitePutSpy.getCall(1).args[0]).to.equal(output('a_bundle_min_css', cssFileContent, ANOTHER_APP_NAME));
+      expect(graphitePutSpy.getCall(2).args[0]).to.equal(output('a_bundle_min_js', someFileContent));
+      expect(graphitePutSpy.getCall(3).args[0]).to.equal(output('a_bundle_min_js', someFileContent, ANOTHER_APP_NAME));
     });
   });
 
@@ -201,8 +219,9 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
+      expect(graphitePutSpy).to.have.been.calledOnce;
+      expect(graphiteCloseSpy).to.have.been.calledOnce;
+      expect(graphitePutSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
     });
   });
 
@@ -213,7 +232,8 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).not.to.have.been.called;
+      expect(graphitePutSpy).not.to.have.been.called;
+      expect(graphiteCloseSpy).not.to.have.been.called;
     });
   });
 
@@ -224,8 +244,9 @@ describe('measure bundle size', () => {
     });
     const task = createTask();
     return task().then(() => {
-      expect(shellExecSpy).to.have.been.calledOnce;
-      expect(shellExecSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
+      expect(graphitePutSpy).to.have.been.calledOnce;
+      expect(graphiteCloseSpy).to.have.been.calledOnce;
+      expect(graphitePutSpy).to.have.been.calledWith(output('app_bundle_min_js', someFileContent));
     });
   });
 });
