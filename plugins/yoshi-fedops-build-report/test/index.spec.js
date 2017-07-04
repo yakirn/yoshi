@@ -17,8 +17,8 @@ const createClient = ({prefix, port, host, callback}) => {
       callback();
     },
     close: graphiteCloseSpy
-  }
-}
+  };
+};
 
 const fedopsBundleSize = proxyquire('../index', {
   'graphite-tcp': {createClient} // eslint-disable-line camelcase

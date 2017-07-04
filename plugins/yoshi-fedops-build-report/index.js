@@ -12,7 +12,7 @@ const fsStatP = filePath => new Promise((resolve, reject) => {
     } else {
       resolve(stats);
     }
-  })
+  });
 });
 
 const tryRequire = name => {
@@ -72,7 +72,7 @@ const reportBundleSize = params => {
         metric.put(command(params), stats.size || 0);
       })
       .catch(err => {
-        console.warn(`Error code ${err.code}. Failed to find size of file ${bundleName}.bundle.min.js.`);
+        console.warn(`Error code ${err.code}. Failed to find size of file ${params.bundleName}.bundle.min.js.`);
         resolve();
       });
   });
