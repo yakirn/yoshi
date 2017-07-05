@@ -9,4 +9,4 @@ module.exports.mockProduction = (isProduction = true) => {
   } else {
     delete process.env.NODE_ENV;
   }
-}
+};
