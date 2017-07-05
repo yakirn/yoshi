@@ -19,9 +19,13 @@
     "eslint-config-wix": "^1.1.4",
     "mocha": "^3.2.0",
     "mocha-env-reporter": "^2.0.4",
+    "mockery": "^2.1.0",
     "wnpm-ci": "latest"
   },
   "eslintConfig": {
     "extends": "wix"
+  },
+  "dependencies": {
+    "is-ci": "^1.0.10"
   }
 }

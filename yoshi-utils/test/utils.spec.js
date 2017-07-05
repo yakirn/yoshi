@@ -1,5 +1,6 @@
 const {expect} = require('chai');
-const {isProduction} = require('../index');
+const {isProduction, isCI} = require('../index');
+const mockery = require('mockery');
 
 describe('Yoshi Utils', () => {
   describe('isProduction', () => {
@@ -20,6 +21,20 @@ describe('Yoshi Utils', () => {
     it('should handle upper case strings', () => {
       process.env.NODE_ENV = 'Production';
       expect(isProduction()).to.equal(true);
+    });
+  });
+  describe('Is CI', () => {
+    beforeEach(() => mockery.enable());
+    afterEach(() => mockery.disable());
+
+    it('should return true', () => {
+      mockery.registerMock('is-ci', true);
+      expect(isCI()).to.equal(true);
+    });
+
+    it('should return false', () => {
+      mockery.registerMock('is-ci', false);
+      expect(isCI()).to.equal(false);
     });
   });
 });
