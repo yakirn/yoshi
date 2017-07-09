@@ -6,15 +6,15 @@ module.exports.cleanMocks = () => {
   mockery.deregisterAll();
 };
 
-module.exports.mockProduction = (isProduction = true) => {
-  if (isProduction) {
+module.exports.mockEnvironment = ({production} = {production: true}) => {
+  if (production) {
     process.env.NODE_ENV = 'production';
   } else {
     delete process.env.NODE_ENV;
   }
 };
 
-module.exports.mockCI = (isCI = true) => {
+module.exports.mockCI = ({ci} = {ci: true}) => {
   mockery.enable();
-  mockery.registerMock('is-ci', isCI);
+  mockery.registerMock('is-ci', ci);
 };

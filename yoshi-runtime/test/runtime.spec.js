@@ -1,6 +1,6 @@
 const {expect} = require('chai');
 const {cssModulesPattren} = require('../index');
-const {cleanMocks, mockProduction, mockCI} = require('yoshi-utils').utilsTestkit;
+const {cleanMocks, mockEnvironment, mockCI} = require('yoshi-utils').utilsTestkit;
 
 describe('CSS modules pattern', () => {
   afterEach(() => {
@@ -8,20 +8,20 @@ describe('CSS modules pattern', () => {
   });
 
   it('should return short pattern for production mode', () => {
-    mockProduction(true);
-    mockCI(false);
+    mockEnvironment({production: true});
+    mockCI({ci: false});
     expect(cssModulesPattren()).to.equal(`[hash:base64:5]`);
   });
 
   it('should return short pattern for local mode', () => {
-    mockProduction(false);
-    mockCI(false);
+    mockEnvironment({production: false});
+    mockCI({ci: false});
     expect(cssModulesPattren()).to.equal(`[path][name]__[local]__[hash:base64:5]`);
   });
 
   it('should return short pattern in CI', () => {
-    mockCI(true);
-    mockProduction(false);
+    mockEnvironment({production: false});
+    mockCI({ci: true});
     expect(cssModulesPattren()).to.equal(`[hash:base64:5]`);
   });
 });
