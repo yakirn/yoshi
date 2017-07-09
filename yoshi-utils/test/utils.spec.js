@@ -4,9 +4,9 @@ const mockery = require('mockery');
 
 describe('Yoshi Utils', () => {
   describe('isProduction', () => {
-    let originalNodeEnv;
-    beforeEach(() => originalNodeEnv = process.env.NODE_ENV);
-    afterEach(() => process.env.NODE_ENV = originalNodeEnv);
+    let originalEnv;
+    beforeEach(() => originalEnv = Object.assign({}, process.env));
+    afterEach(() => process.env = originalEnv);
 
     it('should return true', () => {
       process.env.NODE_ENV = 'production';
@@ -25,7 +25,10 @@ describe('Yoshi Utils', () => {
   });
   describe('Is CI', () => {
     beforeEach(() => mockery.enable());
-    afterEach(() => mockery.disable());
+    afterEach(() => {
+      mockery.disable();
+      mockery.deregisterAll();
+    });
 
     it('should return true', () => {
       mockery.registerMock('is-ci', true);

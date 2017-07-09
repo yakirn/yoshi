@@ -1,8 +1,9 @@
-let oldEnv = process.env;
+let originalEnv = Object.assign({}, process.env);
 const mockery = require('mockery');
 module.exports.cleanMocks = () => {
-  process.env = oldEnv;
+  process.env = originalEnv;
   mockery.disable();
+  mockery.deregisterAll();
 };
 
 module.exports.mockProduction = (isProduction = true) => {
