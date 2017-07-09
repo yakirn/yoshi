@@ -695,13 +695,13 @@ describe('Aggregator: Build', () => {
       const res = myTest
         .setup({
           'src/index.js': `require('css-modules-require-hook')({
-            rootDir: './src',
-            generateScopedName: require('${__dirname}/../config/css-scope-pattern'),
-            extensions: ['.scss', '.css'],
-            camelCase: true
-          });
-          const s = require('./styles/my-file.css')
-          console.log(s);
+              rootDir: './src',
+              generateScopedName: require('${__dirname}/../config/css-scope-pattern'),
+              extensions: ['.scss', '.css'],
+              camelCase: true
+            });
+            const s = require('./styles/my-file.css')
+            console.log(s);
           `,
           'src/styles/my-file.css': `.a {color: red;}`,
           'package.json': `{
