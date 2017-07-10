@@ -42,15 +42,36 @@ describe('CSS modules runtime', () => {
     mockEnvironment({production: true});
     const hash = generateCssModulesPattern('a', 'styles/my-file.css');
     const expectedCssMap = `{ a: '${hash}' }\n`;
-    const myTest = create('src/index');
+    const myTest = create('dist/src/index');
     const res = myTest
       .setup({
-        'src/index.js': `const {configCssModules} = require('${require.resolve('../index')}');
-          configCssModules('./src');
+        'dist/src/index.js': `const {configCssModules} = require('${require.resolve('../index')}');
+          configCssModules('./dist/src');
           const s = require('./styles/my-file.css')
           console.log(s);
         `,
-        'src/styles/my-file.css': `.a {color: red;}`
+        'dist/src/styles/my-file.css': `.a {color: red;}`
+      })
+      .execute('');
+
+    expect(res.code).to.equal(0);
+    expect(res.stdout).to.equal(expectedCssMap);
+    myTest.teardown();
+  });
+
+  it('should generate css modules for node_modules', () => {
+    mockEnvironment({production: true});
+    const hash = generateCssModulesPattern('a', '../node_modules/module/styles/my-file.css');
+    const expectedCssMap = `{ a: '${hash}' }\n`;
+    const myTest = create('dist/src/index');
+    const res = myTest
+      .setup({
+        'dist/src/index.js': `const {configCssModules} = require('${require.resolve('../index')}');
+          configCssModules('./dist/src');
+          const s = require('module/styles/my-file.css')
+          console.log(s);
+        `,
+        'node_modules/module/styles/my-file.css': `.a {color: red;}`
       })
       .execute('');
 

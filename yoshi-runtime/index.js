@@ -8,6 +8,9 @@ module.exports.configCssModules = rootDir => {
     rootDir,
     generateScopedName: (name, filepath) => {
       let generate = genericNames(cssModulesPattren(), {context: rootDir});
+      if (filepath.indexOf('/node_modules/') > -1) {
+        generate = genericNames(cssModulesPattren(), {context: rootDir.replace('/src', '')});
+      }
       return generate(name, filepath);
     },
     extensions: ['.scss', '.css'],
