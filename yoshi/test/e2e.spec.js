@@ -240,7 +240,8 @@ describe('Aggregator: e2e', () => {
       'src/client.js': `const style = require('./some.scss');
         document.body.innerHTML = style.className;
       `,
-      'src/some.scss': `$txt-color:green; .class-name { color: $txt-color }`,
+      'src/some-2.scss': `$txt-color:green; .class-name { color: $txt-color }`,
+      'src/some.scss': `@import "./some-2.scss"`,
       'package.json': fx.packageJson(cdnConfigurations(), {express: 'latest'})
     };
   }

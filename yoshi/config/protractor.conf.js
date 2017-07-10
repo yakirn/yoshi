@@ -45,8 +45,9 @@ const merged = ld.mergeWith({
       extensions: ['.scss', '.css'],
       camelCase: true,
 
-      preprocessCss: data => sass.renderSync({
+      preprocessCss: (data, file) => sass.renderSync({
         data,
+        file,
         includePaths: ['node_modules', 'node_modules/compass-mixins/lib']
       }).css
     });
