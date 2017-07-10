@@ -289,7 +289,7 @@ describe('Loaders', () => {
         test
           .setup({
             'src/client.js': `require('./foo.less');`,
-            'src/foo.less': '@import "~bar/baz.less";',
+            'src/foo.less': '@import "bar/baz.less";',
             'node_modules/bar/baz.less': '.bar{color:red}',
             'package.json': fx.packageJson({}),
           })
