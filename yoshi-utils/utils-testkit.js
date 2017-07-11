@@ -15,6 +15,8 @@ module.exports.mockEnvironment = ({production} = {production: true}) => {
 };
 
 module.exports.mockCI = ({ci} = {ci: true}) => {
-  mockery.enable();
+  mockery.enable({
+    warnOnUnregistered: false
+  });
   mockery.registerMock('is-ci', ci);
 };
