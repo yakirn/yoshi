@@ -4,7 +4,10 @@ const {create} = require('test-phases');
 
 describe('CSS modules pattern', () => {
 
-  beforeEach(() => delete require.cache[require.resolve('../index')]);
+  beforeEach(() => {
+    delete require.cache[require.resolve('../index')];
+    delete require.cache[require.resolve('yoshi-utils')];
+  });
 
   afterEach(() => cleanMocks());
 
