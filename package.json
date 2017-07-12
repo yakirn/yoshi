@@ -125,6 +125,8 @@
     "react-loadable": "^3.0.1",
     "babel-plugin-dynamic-import-node": "^1.0.1",
     "eslint-plugin-jest": "^19.0.1",
-    "trier-promise": "^1.0.1"
+    "trier-promise": "^1.0.1",
+    "eslint": "^3.18.0",
+    "eslint-config-wix": "^1.1.14"
   }
 }

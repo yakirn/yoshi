@@ -21,8 +21,8 @@
     "yeoman-generator": "^0.23.4"
   },
   "devDependencies": {
-    "eslint": "^3.6.1",
-    "eslint-config-wix": "latest",
+    "eslint": "^3.18.0",
+    "eslint-config-wix": "^1.1.14",
     "mocha": "^2.2.3",
     "mocha-env-reporter": "^1.0.2",
     "wnpm-ci": "latest",
