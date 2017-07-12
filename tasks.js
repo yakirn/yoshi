@@ -21,7 +21,8 @@ module.exports['depcheck'] = () => start(depcheck({ignoreMatches: ['wnpm-ci']}))
 
 
 module.exports.sync = () => start(
-  dependencies.sync()
+  dependencies.sync(),
+  module.exports.relock
   /*modules.sync(),
    dependencies.unmanaged(),
    dependencies.latest(),
@@ -83,6 +84,16 @@ module.exports.clean = () => start(
   startModulesTasks.modules.load(),
   startModulesTasks.iter.async()((module, input, asyncReporter) => Start(asyncReporter)(
     startModulesTasks.module.exec(module)('rm -rf node_modules && rm -rf target')
+    )
+  )
+)
+
+/* clean existing yarn.lock files, inject dummy ones for ci */
+module.exports.relock = () => start(
+  startTasks.log('Resetting yarn.lock files'),
+  startModulesTasks.modules.load(),
+  startModulesTasks.iter.async()((module, input, asyncReporter) => Start(asyncReporter)(
+    startModulesTasks.module.exec(module)('rm -f yarn.lock && touch yarn.lock')
     )
   )
 )
