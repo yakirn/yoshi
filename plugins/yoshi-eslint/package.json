@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "eslint": "^3.18.0",
-    "glob": "^7.1.1"
+    "glob": "^7.1.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
