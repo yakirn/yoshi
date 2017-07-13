@@ -17,7 +17,7 @@ module.exports.mockCI = ({ci} = {ci: true}) => {
     process.env.BUILD_NUMBER = true;
   } else {
     delete process.env.CONTINUOUS_INTEGRATION;
-    delete process.env.CONTINUOUS_INTEGRATION;
+    delete process.env.BUILD_NUMBER;
   }
 };
 
@@ -31,7 +31,6 @@ module.exports.getMockedCI = ({ci} = {ci: true}) => {
 
   return {
     CONTINUOUS_INTEGRATION: '',
-    BUILD_NUMBER: '',
-    TEAMCITY_VERSION: ''
+    BUILD_NUMBER: ''
   };
 };
