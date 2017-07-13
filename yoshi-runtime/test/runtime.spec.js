@@ -13,7 +13,7 @@ describe('CSS modules pattern', () => {
     expect(cssModulesPattren()).to.equal(`[hash:base64:5]`);
   });
 
-  it('should return short pattern for local mode', () => {
+  it('should return long pattern for local mode', () => {
     mockEnvironment({production: false});
     mockCI({ci: false});
     expect(cssModulesPattren()).to.equal(`[path][name]__[local]__[hash:base64:5]`);
