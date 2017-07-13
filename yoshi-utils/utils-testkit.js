@@ -1,9 +1,6 @@
 let originalEnv = Object.assign({}, process.env);
-const mockery = require('mockery');
 module.exports.cleanMocks = () => {
   process.env = originalEnv;
-  mockery.disable();
-  mockery.deregisterAll();
 };
 
 module.exports.mockEnvironment = ({production} = {production: true}) => {
@@ -15,8 +12,29 @@ module.exports.mockEnvironment = ({production} = {production: true}) => {
 };
 
 module.exports.mockCI = ({ci} = {ci: true}) => {
-  mockery.enable({
-    warnOnUnregistered: false
-  });
-  mockery.registerMock('is-ci', ci);
+  if (ci) {
+    process.env.CONTINUOUS_INTEGRATION = true;
+    process.env.TEAMCITY_VERSION = true;
+    process.env.BUILD_NUMBER = true;
+  } else {
+    delete process.env.CONTINUOUS_INTEGRATION;
+    delete process.env.TEAMCITY_VERSION;
+    delete process.env.CONTINUOUS_INTEGRATION;
+  }
+};
+
+module.exports.getMockedCI = ({ci} = {ci: true}) => {
+  if (ci) {
+    return {
+      CONTINUOUS_INTEGRATION: true,
+      BUILD_NUMBER: true,
+      TEAMCITY_VERSION: true
+    };
+  }
+
+  return {
+    CONTINUOUS_INTEGRATION: '',
+    BUILD_NUMBER: '',
+    TEAMCITY_VERSION: ''
+  };
 };

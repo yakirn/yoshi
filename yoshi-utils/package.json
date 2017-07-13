@@ -24,8 +24,5 @@
   "eslintConfig": {
     "extends": "wix"
   },
-  "dependencies": {
-    "is-ci": "^1.0.10",
-    "mockery": "^2.1.0"
-  }
+  "dependencies": {}
 }

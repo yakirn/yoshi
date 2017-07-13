@@ -1,15 +1,14 @@
 const {expect} = require('chai');
-const mockery = require('mockery');
 const {isProduction, isCI} = require('../index');
 
 describe('Yoshi Utils', () => {
-  describe('isProduction', () => {
-    let originalEnv;
-    beforeEach(() => {
-      originalEnv = Object.assign({}, process.env);
-    });
-    afterEach(() => process.env = originalEnv);
+  let originalEnv;
+  beforeEach(() => {
+    originalEnv = Object.assign({}, process.env);
+  });
+  afterEach(() => process.env = originalEnv);
 
+  describe('isProduction', () => {
     it('should return true', () => {
       process.env.NODE_ENV = 'production';
       expect(isProduction()).to.equal(true);
@@ -25,25 +24,27 @@ describe('Yoshi Utils', () => {
       expect(isProduction()).to.equal(true);
     });
   });
-  describe('Is CI', () => {
-    beforeEach(() => {
-      delete require.cache[require.resolve('../index')];
-      mockery.enable({
-        warnOnUnregistered: false
-      });
-    });
-    afterEach(() => {
-      mockery.disable();
-      mockery.deregisterAll();
-    });
 
-    it('should return true', () => {
-      mockery.registerMock('is-ci', true);
+  describe('Is CI', () => {
+    it('should return true for TC', () => {
+      process.env.TEAMCITY_VERSION = true;
       expect(isCI()).to.equal(true);
     });
 
-    it('should return false', () => {
-      mockery.registerMock('is-ci', false);
+    it('should return true for TC 2', () => {
+      process.env.BUILD_NUMBER = true;
+      expect(isCI()).to.equal(true);
+    });
+
+    it('should return true for Travis', () => {
+      process.env.CONTINUOUS_INTEGRATION = true;
+      expect(isCI()).to.equal(true);
+    });
+
+    it('should return false for non CI', () => {
+      delete process.env.CONTINUOUS_INTEGRATION;
+      delete process.env.TEAMCITY_VERSION;
+      delete process.env.BUILD_NUMBER;
       expect(isCI()).to.equal(false);
     });
   });
