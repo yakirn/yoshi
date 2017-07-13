@@ -27,11 +27,6 @@ describe('Yoshi Utils', () => {
 
   describe('Is CI', () => {
     it('should return true for TC', () => {
-      process.env.TEAMCITY_VERSION = true;
-      expect(isCI()).to.equal(true);
-    });
-
-    it('should return true for TC 2', () => {
       process.env.BUILD_NUMBER = true;
       expect(isCI()).to.equal(true);
     });
@@ -43,7 +38,6 @@ describe('Yoshi Utils', () => {
 
     it('should return false for non CI', () => {
       delete process.env.CONTINUOUS_INTEGRATION;
-      delete process.env.TEAMCITY_VERSION;
       delete process.env.BUILD_NUMBER;
       expect(isCI()).to.equal(false);
     });

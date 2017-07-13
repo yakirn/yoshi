@@ -14,11 +14,9 @@ module.exports.mockEnvironment = ({production} = {production: true}) => {
 module.exports.mockCI = ({ci} = {ci: true}) => {
   if (ci) {
     process.env.CONTINUOUS_INTEGRATION = true;
-    process.env.TEAMCITY_VERSION = true;
     process.env.BUILD_NUMBER = true;
   } else {
     delete process.env.CONTINUOUS_INTEGRATION;
-    delete process.env.TEAMCITY_VERSION;
     delete process.env.CONTINUOUS_INTEGRATION;
   }
 };
@@ -27,8 +25,7 @@ module.exports.getMockedCI = ({ci} = {ci: true}) => {
   if (ci) {
     return {
       CONTINUOUS_INTEGRATION: true,
-      BUILD_NUMBER: true,
-      TEAMCITY_VERSION: true
+      BUILD_NUMBER: true
     };
   }
 
